@@ -324,9 +324,3 @@ TEST(FileOpen, FileIsNotModified)
     std::string after((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
     EXPECT_EQ(tf.data(), after);
 }
-
-int main(int argc, char **argv)
-{
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
-}
