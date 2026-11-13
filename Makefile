@@ -4,7 +4,12 @@ LDLIBS = -lm
 SRC    = $(wildcard src/*.c)
 OBJ    = $(SRC:.c=.o)
 
-.PHONY: all clean
+CXX         = g++
+CXXFLAGS    = -Iinclude -std=c++17 -Wall -Wextra
+GTEST_FLAGS = $(shell pkg-config --cflags --libs gtest)
+LIB_OBJ     = $(filter-out src/main.o, $(OBJ))
+
+.PHONY: all test clean
 
 all: passgen
 
@@ -16,5 +21,11 @@ passgen: $(OBJ)
 
 $(OBJ): $(wildcard include/*.h)
 
+test: tests/tests
+	./tests/tests
+
+tests/tests: tests/tests.cpp $(LIB_OBJ)
+	$(CXX) $(CXXFLAGS) $^ -o $@ $(GTEST_FLAGS)
+
 clean:
-	rm -f passgen $(OBJ)
+	rm -f passgen tests/tests $(OBJ)
