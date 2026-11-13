@@ -1,3 +1,6 @@
 passgen
 *.o
 build/
+tests/tests
+*.txt
+*.txt
