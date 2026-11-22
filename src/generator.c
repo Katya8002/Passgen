@@ -102,6 +102,7 @@ pg_status generate_password(const pg_config *cfg, char *out, size_t cap)
         }
         used[i] = pos;
 
+        mixed = 0;
         for (k = 0; k < opened; k++) {
             st = file_byte_at(&files[k], pos, &byte);
             if (st != PG_OK) {
