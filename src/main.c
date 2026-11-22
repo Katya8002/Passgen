@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+
 #include "passgen.h"
 #include "cli.h"
 #include "secret.h"
@@ -12,6 +13,7 @@ int main(int argc, char **argv)
     pg_status status;
 
     memset(&cfg, 0, sizeof(cfg));
+    password[0] = '\0';
 
     status = cli_parse(argc, argv, &cfg);
     if (status != PG_OK) {
@@ -24,6 +26,7 @@ int main(int argc, char **argv)
         status = secret_read("Master password: ", cfg.master, sizeof(cfg.master));
         if (status != PG_OK) {
             fprintf(stderr, "error: %s\n", pg_status_message(status));
+            secret_wipe(cfg.master, sizeof(cfg.master));
             return (int)status;
         }
     }
@@ -31,9 +34,11 @@ int main(int argc, char **argv)
     status = generate_password(&cfg, password, sizeof(password));
     if (status != PG_OK) {
         fprintf(stderr, "error: %s\n", pg_status_message(status));
-        return (int)status;
+    } else {
+        printf("%s\n", password);
     }
 
-    printf("%s\n", password);
-    return 0;
+    secret_wipe(cfg.master, sizeof(cfg.master));
+    secret_wipe(password, sizeof(password));
+    return (int)status;
 }

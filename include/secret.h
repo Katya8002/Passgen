@@ -5,5 +5,6 @@
 #include "passgen.h"
 
 pg_status secret_read(const char *prompt, char *buf, size_t cap);
+void secret_wipe(void *ptr, size_t n);
 
 #endif
