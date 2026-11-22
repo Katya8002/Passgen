@@ -8,6 +8,7 @@ CXX         = g++
 CXXFLAGS    = -Iinclude -std=c++17 -Wall -Wextra
 GTEST_FLAGS = $(shell pkg-config --cflags --libs gtest)
 LIB_OBJ     = $(filter-out src/main.o, $(OBJ))
+TEST_SRC    = $(wildcard tests/*.cpp)
 
 .PHONY: all test clean
 
@@ -24,7 +25,7 @@ $(OBJ): $(wildcard include/*.h)
 test: tests/tests
 	./tests/tests
 
-tests/tests: tests/tests.cpp $(LIB_OBJ)
+tests/tests: $(TEST_SRC) $(LIB_OBJ)
 	$(CXX) $(CXXFLAGS) $^ -o $@ $(GTEST_FLAGS)
 
 clean:
