@@ -85,6 +85,46 @@ expect_fail "length 1000" -i $PHOTO -k github -l 1000
 expect_fail "length abc" -i $PHOTO -k github -l abc
 expect_fail "-S with -D" -i $PHOTO -k github -S -D
 
+m1=$($BIN -i $PHOTO -i samples/white.bmp -k github)
+m2=$($BIN -i samples/white.bmp -i $PHOTO -k github)
+if [ -n "$m1" ] && [ "$m1" = "$m2" ] && [ "$m1" != "$p1" ]; then
+    pass "two files: order does not matter, differs from one file"
+else
+    fail "two files: order does not matter, differs from one file"
+fi
+
+expect_fail "five files" -i $PHOTO -i $PHOTO -i $PHOTO -i $PHOTO -i $PHOTO -k github
+
+pm1=$(echo secret | $BIN -i $PHOTO -k github -p)
+pm2=$(echo secret | $BIN -i $PHOTO -k github -p)
+pm3=$(echo other | $BIN -i $PHOTO -k github -p)
+if [ -n "$pm1" ] && [ "$pm1" = "$pm2" ] && [ "$pm1" != "$pm3" ] && [ "$pm1" != "$p1" ]; then
+    pass "-p master password changes the result"
+else
+    fail "-p master password changes the result"
+fi
+
+info_white=$($BIN -i samples/white.bmp -k github -e 2>&1 >/dev/null)
+if [[ $info_white == *low* ]]; then
+    pass "-e warns about weak file"
+else
+    fail "-e warns about weak file"
+fi
+
+info_photo=$($BIN -i $PHOTO -k github -e 2>&1 >/dev/null)
+if [[ $info_photo != *low* ]] && [[ $info_photo == *entropy* ]]; then
+    pass "-e does not warn about good file"
+else
+    fail "-e does not warn about good file"
+fi
+
+out_e=$($BIN -i $PHOTO -k github -e 2>/dev/null)
+if [ "$out_e" = "$p1" ]; then
+    pass "-e keeps stdout as the password only"
+else
+    fail "-e keeps stdout as the password only"
+fi
+
 if [ $FAILED -eq 0 ]; then
     echo "ALL TESTS PASSED"
 else

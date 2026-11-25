@@ -5,6 +5,52 @@
 #include "cli.h"
 #include "secret.h"
 #include "generator.h"
+#include "fileio.h"
+#include "entropy.h"
+
+static int alphabet_size(int flags)
+{
+    int n = 0;
+
+    if (flags & CS_LOWER) {
+        n += 26;
+    }
+    if (flags & CS_UPPER) {
+        n += 26;
+    }
+    if (flags & CS_DIGITS) {
+        n += 10;
+    }
+    if (flags & CS_SYMBOLS) {
+        n += 10;
+    }
+    return n;
+}
+
+static void print_info(const pg_config *cfg)
+{
+    int i;
+    pg_file f;
+    double h;
+
+    for (i = 0; i < cfg->file_count; i++) {
+        if (file_open(cfg->files[i], &f) != PG_OK) {
+            continue;
+        }
+        h = file_entropy(&f);
+        file_close(&f);
+        if (h < 0.0) {
+            continue;
+        }
+        fprintf(stderr, "file %s: entropy %.2f bits per byte", cfg->files[i], h);
+        if (h < ENTROPY_LOW) {
+            fprintf(stderr, " (low: weak source file)");
+        }
+        fprintf(stderr, "\n");
+    }
+    fprintf(stderr, "password strength: about %.1f bits\n",
+            password_bits(cfg->length, alphabet_size(cfg->charset)));
+}
 
 int main(int argc, char **argv)
 {
@@ -35,6 +81,9 @@ int main(int argc, char **argv)
     if (status != PG_OK) {
         fprintf(stderr, "error: %s\n", pg_status_message(status));
     } else {
+        if (cfg.show_info) {
+            print_info(&cfg);
+        }
         printf("%s\n", password);
     }
 
